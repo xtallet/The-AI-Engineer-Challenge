@@ -173,7 +173,7 @@ export default function Home() {
             // If it's an object, try to extract meaningful information
             errorText = JSON.stringify(err);
           }
-        } catch (parseError) {
+        } catch {
           try {
             errorText = await res.text();
           } catch {
