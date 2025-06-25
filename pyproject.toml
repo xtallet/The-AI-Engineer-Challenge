@@ -9,5 +9,5 @@ dependencies = [
     "jupyter>=1.1.1",
     "openai",
     "pydantic>=2.11.4",
-    "uvicorn>=0.34.2",
+    "uvicorn[standard]>=0.34.2",
 ]
