@@ -149,13 +149,18 @@ export default function Home() {
         }),
       });
 
+      console.log("Response status:", res.status);
+      console.log("Response headers:", Object.fromEntries(res.headers.entries()));
+
       if (!res.body) throw new Error("No response body");
       
       if (!res.ok) {
         let errorText = "Unknown error";
         try {
           const err = await res.json();
-          // Handle different error response formats
+          console.log("Error response:", err);
+          
+          // Handle different error response formats from our backend
           if (err.detail) {
             errorText = err.detail;
           } else if (err.message) {
@@ -165,9 +170,10 @@ export default function Home() {
           } else if (typeof err === 'string') {
             errorText = err;
           } else {
+            // If it's an object, try to extract meaningful information
             errorText = JSON.stringify(err);
           }
-        } catch {
+        } catch (parseError) {
           try {
             errorText = await res.text();
           } catch {

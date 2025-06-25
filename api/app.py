@@ -282,7 +282,7 @@ async def http_exception_handler(request, exc):
         "error": "HTTP Error",
         "detail": exc.detail,
         "status_code": exc.status_code,
-        "timestamp": datetime.now()
+        "timestamp": datetime.now().isoformat()
     }
 
 @app.exception_handler(Exception)
@@ -291,9 +291,9 @@ async def general_exception_handler(request, exc):
     logger.error(f"Unhandled exception: {str(exc)}")
     return {
         "error": "Internal Server Error",
-        "detail": "An unexpected error occurred",
+        "detail": str(exc),
         "status_code": 500,
-        "timestamp": datetime.now()
+        "timestamp": datetime.now().isoformat()
     }
 
 # Entry point for running the application directly
