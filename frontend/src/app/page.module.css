@@ -36,9 +36,8 @@
   
   .settingsInput,
   .messageInput {
-    background: #2d3748;
-    color: #f7fafc;
-    border-color: #4a5568;
+    background: #2d3748 !important;
+    color: #f7fafc !important;
   }
   
   .settingsInput:focus,
@@ -49,7 +48,7 @@
   
   .settingsInput::placeholder,
   .messageInput::placeholder {
-    color: #a0aec0;
+    color: #a0aec0 !important;
   }
 }
 
@@ -175,8 +174,8 @@
   border: 2px solid var(--border-color);
   border-radius: 12px;
   font-size: 0.9rem;
-  background: white;
-  color: var(--text-primary);
+  background: #fff !important;
+  color: #2d3748 !important;
   transition: all 0.3s ease;
   resize: vertical;
 }
@@ -188,7 +187,7 @@
 }
 
 .settingsInput::placeholder {
-  color: var(--text-secondary);
+  color: #718096 !important;
   opacity: 0.7;
 }
 
@@ -527,8 +526,8 @@
   font-size: 1rem;
   resize: none;
   max-height: 120px;
-  background: white;
-  color: var(--text-primary);
+  background: #fff !important;
+  color: #2d3748 !important;
   transition: all 0.3s ease;
   font-family: inherit;
 }
@@ -545,7 +544,7 @@
 }
 
 .messageInput::placeholder {
-  color: var(--text-secondary);
+  color: #718096 !important;
   opacity: 0.7;
 }
 
