@@ -265,7 +265,7 @@ export default function Home() {
                 <textarea
                   value={developerMessage}
                   onChange={(e) => setDeveloperMessage(e.target.value)}
-                  placeholder="Enter the system prompt that defines the AI's behavior..."
+                  placeholder="Enter the system prompt that defines the AI&apos;s behavior..."
                   rows={3}
                   className={styles.settingsInput}
                 />
