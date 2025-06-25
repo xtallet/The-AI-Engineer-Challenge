@@ -155,11 +155,24 @@ export default function Home() {
         let errorText = "Unknown error";
         try {
           const err = await res.json();
-          errorText = err.detail || errorText;
+          // Handle different error response formats
+          if (err.detail) {
+            errorText = err.detail;
+          } else if (err.message) {
+            errorText = err.message;
+          } else if (err.error) {
+            errorText = err.error;
+          } else if (typeof err === 'string') {
+            errorText = err;
+          } else {
+            errorText = JSON.stringify(err);
+          }
         } catch {
           try {
             errorText = await res.text();
-          } catch {}
+          } catch {
+            errorText = `HTTP ${res.status}: ${res.statusText}`;
+          }
         }
         throw new Error(errorText);
       }
@@ -190,13 +203,19 @@ export default function Home() {
         }
       }
     } catch (err: unknown) {
+      console.error("Chat error:", err);
+      let errorMessage = "Something went wrong";
+      
       if (err instanceof Error) {
-        setError(err.message || "Something went wrong");
-        addMessage('system', `Error: ${err.message}`);
-      } else {
-        setError("Something went wrong");
-        addMessage('system', "Error: Something went wrong");
+        errorMessage = err.message;
+      } else if (typeof err === 'string') {
+        errorMessage = err;
+      } else if (err && typeof err === 'object') {
+        errorMessage = JSON.stringify(err);
       }
+      
+      setError(errorMessage);
+      addMessage('system', `Error: ${errorMessage}`);
     } finally {
       setLoading(false);
       setIsTyping(false);
