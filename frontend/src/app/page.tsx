@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import Image from "next/image";
 import styles from "./page.module.css";
 
@@ -66,7 +66,7 @@ export default function Home() {
     }
   };
 
-  const validateApiKey = async () => {
+  const validateApiKey = useCallback(async () => {
     if (!apiKey.trim()) return;
     
     setValidatingKey(true);
@@ -90,13 +90,13 @@ export default function Home() {
       } else {
         setError("");
       }
-    } catch (error) {
+    } catch {
       setApiKeyValid(false);
       setError("Failed to validate API key");
     } finally {
       setValidatingKey(false);
     }
-  };
+  }, [apiKey]);
 
   // Validate API key when it changes
   useEffect(() => {
@@ -106,7 +106,7 @@ export default function Home() {
     } else {
       setApiKeyValid(false);
     }
-  }, [apiKey]);
+  }, [apiKey, validateApiKey]);
 
   const addMessage = (role: 'user' | 'assistant' | 'system', content: string) => {
     const newMessage: Message = {
@@ -333,7 +333,7 @@ export default function Home() {
                   </div>
                   <div className={styles.tip}>
                     <span className={styles.tipIcon}>🎯</span>
-                    <span>Write a clear system prompt to guide the AI's behavior</span>
+                    <span>Write a clear system prompt to guide the AI&apos;s behavior</span>
                   </div>
                   <div className={styles.tip}>
                     <span className={styles.tipIcon}>⚡</span>
