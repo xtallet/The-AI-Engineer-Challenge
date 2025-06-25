@@ -33,6 +33,24 @@
     --text-secondary: #a0aec0;
     --border-color: #4a5568;
   }
+  
+  .settingsInput,
+  .messageInput {
+    background: #2d3748;
+    color: #f7fafc;
+    border-color: #4a5568;
+  }
+  
+  .settingsInput:focus,
+  .messageInput:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+  }
+  
+  .settingsInput::placeholder,
+  .messageInput::placeholder {
+    color: #a0aec0;
+  }
 }
 
 .main {
@@ -158,6 +176,7 @@
   border-radius: 12px;
   font-size: 0.9rem;
   background: white;
+  color: var(--text-primary);
   transition: all 0.3s ease;
   resize: vertical;
 }
@@ -166,6 +185,11 @@
   outline: none;
   border-color: #667eea;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.settingsInput::placeholder {
+  color: var(--text-secondary);
+  opacity: 0.7;
 }
 
 .validInput {
@@ -504,6 +528,7 @@
   resize: none;
   max-height: 120px;
   background: white;
+  color: var(--text-primary);
   transition: all 0.3s ease;
   font-family: inherit;
 }
@@ -517,6 +542,11 @@
 .messageInput:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.messageInput::placeholder {
+  color: var(--text-secondary);
+  opacity: 0.7;
 }
 
 .sendButton {
