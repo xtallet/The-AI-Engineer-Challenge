@@ -59,12 +59,14 @@ class ChatRequest(BaseModel):
     def validate_model(cls, v):
         allowed_models = ["gpt-4.1-mini", "gpt-4", "gpt-3.5-turbo", "gpt-4-turbo"]
         if v not in allowed_models:
+            # ValueError will be handled by FastAPI and returned as a string error detail
             raise ValueError(f"Model must be one of: {', '.join(allowed_models)}")
         return v
 
     @validator('api_key')
     def validate_api_key(cls, v):
         if not v.startswith('sk-'):
+            # ValueError will be handled by FastAPI and returned as a string error detail
             raise ValueError("API key must start with 'sk-'")
         return v
 
@@ -277,6 +279,8 @@ async def validate_api_key(request: ChatRequest):
 # Error handlers for better user experience
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request, exc):
+    # Log the HTTPException details and request info for debugging
+    logger.error(f"HTTPException: status_code={exc.status_code}, detail={exc.detail}, url={request.url}")
     # If detail is not a string, convert it to a string
     detail = exc.detail
     if not isinstance(detail, str):
@@ -296,7 +300,8 @@ async def http_exception_handler(request, exc):
 
 @app.exception_handler(Exception)
 async def general_exception_handler(request, exc):
-    logger.error(f"Unhandled exception: {str(exc)}")
+    # Log the unhandled exception details and request info for debugging
+    logger.error(f"Unhandled exception: {str(exc)}, url={request.url}")
     detail = str(exc)
     if not detail or detail == "{}":
         detail = "An unexpected error occurred."
