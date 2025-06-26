@@ -213,8 +213,13 @@ export default function Home() {
       let errorMessage = "Something went wrong";
 
       if (err instanceof Error) {
-        if (err.message === "[object Object]" && (err as any).originalError) {
-          errorMessage = JSON.stringify((err as any).originalError, null, 2);
+        if (
+          err.message === "[object Object]" &&
+          typeof err === "object" &&
+          err !== null &&
+          "originalError" in err
+        ) {
+          errorMessage = JSON.stringify((err as Record<string, unknown>).originalError, null, 2);
         } else {
           errorMessage = err.message;
         }
