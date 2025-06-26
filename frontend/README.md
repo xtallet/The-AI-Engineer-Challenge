@@ -1,6 +1,6 @@
-# 🚀 Next.js Frontend for AI Chat
+# 🚀 Next.js Frontend for AI Chat (Vercel Advanced)
 
-Welcome to your snazzy new frontend! This app lets you chat with your FastAPI backend (in `/api/app.py`) using a single-exchange chat UI. 
+Welcome to the advanced, vibed-up frontend! This app features a modern UI, loading spinner, error handling, and is ready for both local and Vercel deployments.
 
 ## 🏃‍♂️ Running Locally
 
@@ -8,28 +8,33 @@ Welcome to your snazzy new frontend! This app lets you chat with your FastAPI ba
    ```bash
    cd frontend
    ```
-2. Install dependencies (just once):
+2. Install dependencies:
    ```bash
    npm install
    ```
-3. Start the development server:
+3. (Optional) Create a `.env.local` file to set a custom backend API URL:
+   ```env
+   NEXT_PUBLIC_API_URL=http://localhost:8000
+   ```
+   If not set, defaults to relative `/api` (works with local proxy or Vercel serverless).
+4. Start the development server:
    ```bash
    npm run dev
    ```
-4. Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-> **Note:** Make sure your FastAPI backend is running and accessible at `/api/chat` and `/api/health` (see `/api/app.py`).
+5. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## 🌐 Deploying to Vercel
 
-1. [Sign up for Vercel](https://vercel.com/) if you haven't already.
-2. Push your project to GitHub (or your favorite git host).
-3. Import your repo into Vercel and follow the prompts. Vercel will auto-detect the Next.js app in `frontend/`.
-4. Set up your backend as a Vercel Serverless Function or deploy it separately (see Vercel docs for Python backends).
+1. Push your project to GitHub.
+2. Import your repo into Vercel.
+3. In Vercel dashboard, set `NEXT_PUBLIC_API_URL` in your project's Environment Variables if your backend is hosted elsewhere.
+4. Deploy!
 
 ## 💡 Features
-- Clean, modern UI
+- Modern, gradient UI with extra vibes
+- Loading spinner and error feedback
 - Secure API key entry
 - Streams responses from your backend in real time
+- Footer links to GitHub and Vercel
 
-Have fun building! ✨
+Enjoy the vibes! ✨
