@@ -180,7 +180,10 @@ export default function Home() {
             errorText = `HTTP ${res.status}: ${res.statusText}`;
           }
         }
-        throw new Error(String(errorText));
+        // Attach the original error for debugging
+        const errorObj = new Error(String(errorText));
+        (errorObj as Record<string, unknown>).originalError = errorText;
+        throw errorObj;
       }
 
       const reader = res.body.getReader();
@@ -209,17 +212,19 @@ export default function Home() {
         }
       }
     } catch (err: unknown) {
-      console.error("Chat error:", err);
+      // Always log the full error for debugging
+      console.error("Chat error (full):", err);
+
       let errorMessage = "Something went wrong";
 
       if (err instanceof Error) {
         if (
           err.message === "[object Object]" &&
           typeof err === "object" &&
-          err !== null &&
-          "originalError" in err
+          err !== null
         ) {
-          errorMessage = JSON.stringify((err as Record<string, unknown>).originalError, null, 2);
+          // Try to extract any nested error info
+          errorMessage = JSON.stringify(err, Object.getOwnPropertyNames(err), 2);
         } else {
           errorMessage = err.message;
         }
