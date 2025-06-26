@@ -113,7 +113,6 @@ export default function Home() {
           style={{
             width: "100%",
             maxWidth: 480,
-            minHeight: 60,
             background: "var(--gray-alpha-100)",
             borderRadius: 8,
             padding: 12,
