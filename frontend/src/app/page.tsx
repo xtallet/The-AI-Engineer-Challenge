@@ -182,7 +182,7 @@ export default function Home() {
         }
         // Attach the original error for debugging
         const errorObj = new Error(String(errorText));
-        (errorObj as Record<string, unknown>).originalError = errorText;
+        (errorObj as unknown as Record<string, unknown>).originalError = errorText;
         throw errorObj;
       }
 
