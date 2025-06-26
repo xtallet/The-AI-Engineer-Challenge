@@ -160,7 +160,6 @@ export default function Home() {
           const err = await res.json();
           console.log("Error response:", err);
           
-          // Handle different error response formats from our backend
           if (err.detail) {
             errorText = err.detail;
           } else if (err.message) {
@@ -169,9 +168,10 @@ export default function Home() {
             errorText = err.error;
           } else if (typeof err === 'string') {
             errorText = err;
+          } else if (typeof err === 'object') {
+            errorText = JSON.stringify(err, null, 2);
           } else {
-            // If it's an object, try to extract meaningful information
-            errorText = JSON.stringify(err);
+            errorText = 'Unknown error';
           }
         } catch {
           try {
@@ -180,7 +180,7 @@ export default function Home() {
             errorText = `HTTP ${res.status}: ${res.statusText}`;
           }
         }
-        throw new Error(errorText);
+        throw new Error(String(errorText));
       }
 
       const reader = res.body.getReader();
@@ -211,17 +211,21 @@ export default function Home() {
     } catch (err: unknown) {
       console.error("Chat error:", err);
       let errorMessage = "Something went wrong";
-      
+
       if (err instanceof Error) {
-        errorMessage = err.message;
-      } else if (typeof err === 'string') {
+        if (err.message === "[object Object]" && (err as any).originalError) {
+          errorMessage = JSON.stringify((err as any).originalError, null, 2);
+        } else {
+          errorMessage = err.message;
+        }
+      } else if (typeof err === "string") {
         errorMessage = err;
-      } else if (err && typeof err === 'object') {
-        errorMessage = JSON.stringify(err);
+      } else if (err && typeof err === "object") {
+        errorMessage = JSON.stringify(err, null, 2);
       }
-      
+
       setError(errorMessage);
-      addMessage('system', `Error: ${errorMessage}`);
+      addMessage("system", `Error: ${errorMessage}`);
     } finally {
       setLoading(false);
       setIsTyping(false);
