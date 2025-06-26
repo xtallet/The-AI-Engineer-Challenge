@@ -288,11 +288,14 @@ async def http_exception_handler(request, exc):
             detail = json.dumps(detail)
         except Exception:
             detail = str(detail)
+    # If detail is empty, '{}', or None, provide a helpful message
+    if not detail or detail.strip() == "{}" or detail.strip() == "[]":
+        detail = "An unknown error occurred. Please check the backend logs for more details."
     return JSONResponse(
         status_code=exc.status_code,
         content={
             "error": "HTTP Error",
-            "detail": detail if detail else "An unknown error occurred.",
+            "detail": detail,
             "status_code": exc.status_code,
             "timestamp": datetime.now().isoformat()
         }
