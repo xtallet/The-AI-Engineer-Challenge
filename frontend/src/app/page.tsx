@@ -234,8 +234,12 @@ export default function Home() {
         errorMessage = JSON.stringify(err, null, 2);
       }
 
-      setError(errorMessage);
-      addMessage("system", `Error: ${errorMessage}`);
+      setError(errorMessage === "[object Object]" || errorMessage === "{}" || errorMessage === "[{}]"
+        ? "An unknown error occurred. Please check the backend logs for more details."
+        : errorMessage);
+      addMessage("system", `Error: ${errorMessage === "[object Object]" || errorMessage === "{}" || errorMessage === "[{}]"
+        ? "An unknown error occurred. Please check the backend logs for more details."
+        : errorMessage}`);
     } finally {
       setLoading(false);
       setIsTyping(false);

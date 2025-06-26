@@ -1,6 +1,6 @@
 # Import required FastAPI components for building the API
 from fastapi import FastAPI, HTTPException, Depends, status
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 # Import Pydantic for data validation and settings management
@@ -277,24 +277,28 @@ async def validate_api_key(request: ChatRequest):
 # Error handlers for better user experience
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request, exc):
-    """Custom HTTP exception handler with detailed error information"""
-    return {
-        "error": "HTTP Error",
-        "detail": exc.detail,
-        "status_code": exc.status_code,
-        "timestamp": datetime.now().isoformat()
-    }
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "error": "HTTP Error",
+            "detail": str(exc.detail) if exc.detail else "An unknown error occurred.",
+            "status_code": exc.status_code,
+            "timestamp": datetime.now().isoformat()
+        }
+    )
 
 @app.exception_handler(Exception)
 async def general_exception_handler(request, exc):
-    """General exception handler for unexpected errors"""
     logger.error(f"Unhandled exception: {str(exc)}")
-    return {
-        "error": "Internal Server Error",
-        "detail": str(exc),
-        "status_code": 500,
-        "timestamp": datetime.now().isoformat()
-    }
+    return JSONResponse(
+        status_code=500,
+        content={
+            "error": "Internal Server Error",
+            "detail": str(exc) if str(exc) else "An unexpected error occurred.",
+            "status_code": 500,
+            "timestamp": datetime.now().isoformat()
+        }
+    )
 
 # Entry point for running the application directly
 if __name__ == "__main__":
