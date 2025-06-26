@@ -30,7 +30,7 @@ cd api
 
 2. Start the server:
 ```bash
-python app.py
+python index.py
 ```
 
 The server will start on `http://localhost:8000`
