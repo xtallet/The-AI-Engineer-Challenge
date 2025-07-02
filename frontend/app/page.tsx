@@ -19,6 +19,7 @@ export default function Home() {
     setPdfUploadStatus("Uploading...");
     const formData = new FormData();
     formData.append("file", pdfFile);
+    formData.append("api_key", apiKey);
     try {
       const res = await fetch("/api/pdf/upload", {
         method: "POST",

@@ -12,6 +12,7 @@ from aimakerspace.text_utils import PDFLoader, CharacterTextSplitter
 from aimakerspace.vectordatabase import VectorDatabase
 import shutil
 import tempfile
+from aimakerspace.openai_utils.embedding import EmbeddingModel
 
 # Initialize FastAPI application with a title
 app = FastAPI(title="OpenAI Chat API")
@@ -75,7 +76,7 @@ pdf_vector_db = None
 pdf_chunks = None
 
 @app.post("/api/pdf/upload")
-async def upload_pdf(file: UploadFile = File(...)):
+async def upload_pdf(file: UploadFile = File(...), api_key: str = Form(...)):
     try:
         # Save uploaded PDF to a temp file
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
@@ -87,8 +88,19 @@ async def upload_pdf(file: UploadFile = File(...)):
         splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
         global pdf_chunks, pdf_vector_db
         pdf_chunks = splitter.split_texts(documents)
-        # Build vector DB
-        vector_db = VectorDatabase()
+        # Build vector DB with user-supplied API key
+        class UserEmbeddingModel(EmbeddingModel):
+            def __init__(self, api_key, embeddings_model_name: str = "text-embedding-3-small"):
+                self.openai_api_key = api_key
+                self.async_client = None
+                self.client = None
+                self.embeddings_model_name = embeddings_model_name
+                import openai
+                openai.api_key = api_key
+                from openai import AsyncOpenAI, OpenAI
+                self.async_client = AsyncOpenAI(api_key=api_key)
+                self.client = OpenAI(api_key=api_key)
+        vector_db = VectorDatabase(embedding_model=UserEmbeddingModel(api_key))
         import asyncio
         vector_db = await vector_db.abuild_from_list(pdf_chunks)
         pdf_vector_db = vector_db
