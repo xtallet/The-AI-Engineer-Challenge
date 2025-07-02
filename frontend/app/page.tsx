@@ -12,6 +12,14 @@ export default function Home() {
   const [pdfContext, setPdfContext] = useState("");
   const [pdfLoading, setPdfLoading] = useState(false);
 
+  const exampleQuestions = [
+    "What is my deductible for collision coverage?",
+    "Does my policy cover rental car reimbursement?",
+    "How do I file a claim for a stolen vehicle?",
+    "Are there any exclusions for flood damage?",
+    "What is the process for adding a new driver to my policy?",
+  ];
+
   // PDF upload handler
   const handlePdfUpload = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,8 +78,17 @@ export default function Home() {
   return (
     <div className={styles.page}>
       <main className={styles.main}>
-        <h1>Chat with your PDF</h1>
+        <h1>Insurance Policy Q&amp;A Assistant</h1>
+        <p style={{ maxWidth: 480, margin: '0 auto 16px', color: '#555' }}>
+          Upload your car or home insurance policy PDF and ask questions about your coverage, deductibles, exclusions, and more. Try the example questions below!
+        </p>
         <section style={{ width: "100%", maxWidth: 480, marginTop: 32 }}>
+          <div style={{ marginBottom: 16 }}>
+            <strong>Try with a sample insurance policy PDF:</strong>
+            <a href="https://doi.nv.gov/uploadedFiles/doinvgov/_public-documents/Consumers/PP_00_01_06_98.pdf" target="_blank" rel="noopener noreferrer" style={{ color: '#0070f3', textDecoration: 'underline', marginLeft: 8 }}>
+              Download Sample Car Insurance Policy
+            </a>
+          </div>
           <form onSubmit={handlePdfUpload} style={{ marginBottom: 16 }}>
             <input
               type="file"
@@ -81,7 +98,7 @@ export default function Home() {
               style={{ marginBottom: 8 }}
             />
             <button type="submit" className={styles.primary} disabled={!pdfFile}>
-              Upload & Index PDF
+              Upload &amp; Index PDF
             </button>
           </form>
           <div style={{ marginBottom: 16, minHeight: 24 }}>{pdfUploadStatus}</div>
@@ -107,7 +124,7 @@ export default function Home() {
               />
             </label>
             <label>
-              Ask a question about your PDF:
+              Ask a question about your policy:
               <input
                 type="text"
                 value={pdfQuestion}
@@ -115,8 +132,18 @@ export default function Home() {
                 required
                 style={{ width: "100%", minHeight: 32, marginTop: 4, marginBottom: 8 }}
                 disabled={!pdfUploadStatus.startsWith("PDF uploaded")}
+                placeholder="e.g. What is my deductible for collision coverage?"
               />
             </label>
+            <div style={{ marginBottom: 8 }}>
+              <strong>Example questions:</strong>
+              <ul style={{ paddingLeft: 16, margin: '8px 0' }}>
+                {exampleQuestions.map((q, i) => (
+                  <li key={i} style={{ cursor: 'pointer', color: '#0070f3', textDecoration: 'underline' }}
+                      onClick={() => setPdfQuestion(q)}>{q}</li>
+                ))}
+              </ul>
+            </div>
             <button type="submit" className={styles.primary} disabled={pdfLoading || !pdfUploadStatus.startsWith("PDF uploaded") || !pdfQuestion}>
               {pdfLoading ? "Thinking..." : "Ask PDF"}
             </button>

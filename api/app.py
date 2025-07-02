@@ -124,7 +124,11 @@ async def chat_with_pdf(request: PDFChatRequest):
         top_chunks = pdf_vector_db.search_by_text(request.query, k=request.k, return_as_text=True)
         # Compose context for RAG
         context = "\n---\n".join(top_chunks)
-        prompt = f"You are a helpful assistant. Use the following PDF context to answer the user's question.\n\nContext:\n{context}\n\nQuestion: {request.query}\nAnswer:"
+        system_message = (
+            "You are an expert insurance assistant. Use the provided insurance policy context to answer the user's question as clearly and accurately as possible. "
+            "If the answer is not in the context, say 'I could not find this information in your policy.'\n"
+        )
+        prompt = f"{system_message}\nContext:\n{context}\n\nQuestion: {request.query}\nAnswer:"
         # Use OpenAI API for completion
         client = OpenAI(api_key=request.api_key) if request.api_key else OpenAI()
         completion = client.chat.completions.create(

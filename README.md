@@ -171,16 +171,76 @@ Here's a template to get your post started!
 ```
 🚀🎉 Exciting News! 🎉🚀
 
-🏗️ Today, I'm thrilled to announce that I've successfully built and shipped my first-ever LLM using the powerful combination of , and the OpenAI API! 🖥️
+🏗️ Today, I'm thrilled to announce that I've successfully built and shipped my first-ever LLM using the powerful combination of , and the OpenAI API! 🖥️
 
 Check it out 👇
 [LINK TO APP]
 
 A big shoutout to the @AI Makerspace for all making this possible. Couldn't have done it without the incredible community there. 🤗🙏
 
-Looking forward to building with the community! 🙌✨ Here's to many more creations ahead! 🥂🎉
+Looking forward to building with the community! 🙌✨ Here's to many more creations ahead! 🥂🎉
 
 Who else is diving into the world of AI? Let's connect! 🌐💡
 
 #FirstLLMApp 
 ```
+
+# Insurance Policy Q&A Assistant
+
+This application allows you to upload an insurance policy PDF (car, home, etc.) and ask questions about your coverage, deductibles, exclusions, and more. The app uses Retrieval-Augmented Generation (RAG) to provide answers grounded in your actual policy document.
+
+---
+
+## 🚗🏠 Supported Use-Case
+
+- **Insurance Policy Q&A:**
+  - Upload your car or home insurance policy PDF.
+  - Ask natural language questions about your policy.
+  - Get answers based on the real content of your document.
+
+---
+
+## 🏁 How to Use
+
+1. **Start the backend:**
+   ```bash
+   cd api
+   PYTHONPATH=.. uvicorn app:app --reload
+   ```
+2. **Start the frontend:**
+   ```bash
+   cd frontend
+   npm run dev
+   ```
+3. **Open the app:**
+   - Go to [http://localhost:3000](http://localhost:3000)
+4. **Upload a PDF:**
+   - Use your own insurance policy PDF, or try this [Sample Car Insurance Policy PDF](https://doi.nv.gov/uploadedFiles/doinvgov/_public-documents/Consumers/PP_00_01_06_98.pdf)
+5. **Enter your OpenAI API key** (required for embedding and chat).
+6. **Ask questions** about your policy using the example questions or your own.
+
+---
+
+## 💡 Example Questions
+- What is my deductible for collision coverage?
+- Does my policy cover rental car reimbursement?
+- How do I file a claim for a stolen vehicle?
+- Are there any exclusions for flood damage?
+- What is the process for adding a new driver to my policy?
+
+---
+
+## 🛠️ How it Works
+- The app extracts and indexes your PDF using OpenAI embeddings.
+- When you ask a question, it finds the most relevant sections of your policy and uses them as context for the LLM.
+- The model answers as an expert insurance assistant, grounded in your actual document.
+
+---
+
+## 📄 License & Credits
+- Built with [Next.js](https://nextjs.org/), [FastAPI](https://fastapi.tiangolo.com/), and [OpenAI](https://openai.com/).
+- Sample policy PDF courtesy of the [Nevada Division of Insurance](https://doi.nv.gov/).
+
+---
+
+Happy insurance policy exploring! 🚗🏠
