@@ -1,6 +1,6 @@
 # Import required FastAPI components for building the API
-from fastapi import FastAPI, HTTPException
-from fastapi.responses import StreamingResponse
+from fastapi import FastAPI, HTTPException, UploadFile, File, Form
+from fastapi.responses import StreamingResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 # Import Pydantic for data validation and settings management
 from pydantic import BaseModel
@@ -8,6 +8,10 @@ from pydantic import BaseModel
 from openai import OpenAI
 import os
 from typing import Optional
+from aimakerspace.text_utils import PDFLoader, CharacterTextSplitter
+from aimakerspace.vectordatabase import VectorDatabase
+import shutil
+import tempfile
 
 # Initialize FastAPI application with a title
 app = FastAPI(title="OpenAI Chat API")
@@ -65,6 +69,61 @@ async def chat(request: ChatRequest):
 @app.get("/api/health")
 async def health_check():
     return {"status": "ok"}
+
+# In-memory storage for demo (not production safe)
+pdf_vector_db = None
+pdf_chunks = None
+
+@app.post("/api/pdf/upload")
+async def upload_pdf(file: UploadFile = File(...)):
+    try:
+        # Save uploaded PDF to a temp file
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
+            shutil.copyfileobj(file.file, tmp)
+            tmp_path = tmp.name
+        # Load and split PDF
+        loader = PDFLoader(tmp_path)
+        documents = loader.load_documents()
+        splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+        global pdf_chunks, pdf_vector_db
+        pdf_chunks = splitter.split_texts(documents)
+        # Build vector DB
+        vector_db = VectorDatabase()
+        import asyncio
+        vector_db = await vector_db.abuild_from_list(pdf_chunks)
+        pdf_vector_db = vector_db
+        return {"status": "success", "num_chunks": len(pdf_chunks)}
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"error": str(e)})
+
+class PDFChatRequest(BaseModel):
+    query: str
+    api_key: str = None
+    k: int = 3
+    model: Optional[str] = "gpt-4.1-mini"
+
+@app.post("/api/pdf/chat")
+async def chat_with_pdf(request: PDFChatRequest):
+    try:
+        global pdf_vector_db, pdf_chunks
+        if pdf_vector_db is None or pdf_chunks is None:
+            return JSONResponse(status_code=400, content={"error": "No PDF indexed. Please upload a PDF first."})
+        # Retrieve top-k relevant chunks
+        top_chunks = pdf_vector_db.search_by_text(request.query, k=request.k, return_as_text=True)
+        # Compose context for RAG
+        context = "\n---\n".join(top_chunks)
+        prompt = f"You are a helpful assistant. Use the following PDF context to answer the user's question.\n\nContext:\n{context}\n\nQuestion: {request.query}\nAnswer:"
+        # Use OpenAI API for completion
+        client = OpenAI(api_key=request.api_key) if request.api_key else OpenAI()
+        completion = client.chat.completions.create(
+            model=request.model,
+            messages=[{"role": "system", "content": prompt}],
+            max_tokens=512
+        )
+        answer = completion.choices[0].message.content
+        return {"answer": answer, "context": context}
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"error": str(e)})
 
 # Entry point for running the application directly
 if __name__ == "__main__":
