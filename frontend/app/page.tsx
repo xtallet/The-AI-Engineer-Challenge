@@ -90,7 +90,7 @@ export default function Home() {
           <div style={{
             width: '100%',
             maxWidth: 'unset',
-            background: '#fff',
+            background: 'rgba(255,255,255,0.8)',
             borderRadius: 16,
             boxShadow: '0 2px 12px rgba(61,36,108,0.08)',
             border: '1.5px solid #a5d8ff',
@@ -123,7 +123,7 @@ export default function Home() {
               <div style={{
                 flex: 1,
                 minWidth: 0,
-                background: '#fff',
+                background: 'rgba(255,255,255,0.8)',
                 borderRadius: 16,
                 boxShadow: '0 2px 12px rgba(61,36,108,0.08)',
                 border: '1.5px solid #a5d8ff',
@@ -159,18 +159,12 @@ export default function Home() {
                       borderRadius: 16,
                       fontWeight: 600,
                       boxShadow: '0 2px 8px rgba(61,36,108,0.10)',
-                      padding: '12px 28px',
-                      fontSize: '1rem',
+                      padding: '8px 18px',
+                      fontSize: '0.95rem',
                       transition: 'background 0.2s',
                     }}
                   >
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-                      <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ verticalAlign: 'middle' }}>
-                        <rect x="3" y="3" width="18" height="18" rx="2" fill="#1976d2"/>
-                        <text x="12" y="17" textAnchor="middle" fontSize="12" fill="#fff" fontWeight="bold">PDF</text>
-                      </svg>
-                      Upload &amp; Index PDF
-                    </span>
+                    Upload & Index PDF
                   </button>
                 </form>
                 <div style={{ marginBottom: 16, minHeight: 24, display: 'flex', alignItems: 'center', gap: 8, background: '#f0f1f4', borderRadius: 8, padding: '6px 14px' }}>
@@ -277,7 +271,7 @@ export default function Home() {
               <div style={{
                 flex: 1,
                 minWidth: 0,
-                background: '#fff',
+                background: 'rgba(255,255,255,0.8)',
                 borderRadius: 16,
                 boxShadow: '0 2px 12px rgba(61,36,108,0.08)',
                 border: '1.5px solid #a5d8ff',
