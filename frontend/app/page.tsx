@@ -113,7 +113,7 @@ export default function Home() {
               <span>Insurance Policy Q&amp;A Assistant</span>
             </div>
             <p style={{ fontSize: 18, color: '#555', fontWeight: 400, margin: '16px 0 0 0', maxWidth: 700, textAlign: 'center' }}>
-              Upload your insurance policy document (PDF) and ask questions about your coverage, deductibles, exclusions, and more. Try the example questions below!
+              Upload your insurance policy document (PDF or DOCX) and ask questions about your coverage, deductibles, exclusions, and more. Try the example questions below!
             </p>
           </div>
         </div>
@@ -143,7 +143,7 @@ export default function Home() {
                 <form onSubmit={handlePdfUpload} style={{ marginBottom: 16 }}>
                   <input
                     type="file"
-                    accept="application/pdf"
+                    accept="application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                     onChange={(e) => setPdfFile(e.target.files?.[0] || null)}
                     required
                     style={{ marginBottom: 8 }}
@@ -164,7 +164,7 @@ export default function Home() {
                       transition: 'background 0.2s',
                     }}
                   >
-                    Upload & Index PDF
+                    Upload & Index Document
                   </button>
                 </form>
                 <div style={{ marginBottom: 16, minHeight: 24, display: 'flex', alignItems: 'center', gap: 8, background: '#f0f1f4', borderRadius: 8, padding: '6px 14px' }}>

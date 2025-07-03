@@ -1,6 +1,7 @@
 import os
 from typing import List
 import PyPDF2
+from docx import Document
 
 
 class TextFileLoader:
@@ -115,6 +116,27 @@ class PDFLoader:
                             text += page.extract_text() + "\n"
                         
                         self.documents.append(text)
+
+    def load_documents(self):
+        self.load()
+        return self.documents
+
+
+class DocxLoader:
+    def __init__(self, path: str):
+        self.documents = []
+        self.path = path
+        print(f"DocxLoader initialized with path: {self.path}")
+
+    def load(self):
+        print(f"Loading DOCX from path: {self.path}")
+        try:
+            with open(self.path, 'rb') as file:
+                doc = Document(file)
+                text = "\n".join([para.text for para in doc.paragraphs])
+                self.documents.append(text)
+        except Exception as e:
+            raise ValueError(f"Error processing DOCX file at '{self.path}': {str(e)}")
 
     def load_documents(self):
         self.load()

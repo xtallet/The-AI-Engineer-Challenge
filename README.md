@@ -194,7 +194,7 @@ This application allows you to upload an insurance policy PDF (car, home, etc.) 
 ## 🚗🏠 Supported Use-Case
 
 - **Insurance Policy Q&A:**
-  - Upload your car or home insurance policy PDF.
+  - Upload your car or home insurance policy PDF or DOCX.
   - Ask natural language questions about your policy.
   - Get answers based on the real content of your document.
 
@@ -215,7 +215,7 @@ This application allows you to upload an insurance policy PDF (car, home, etc.) 
 3. **Open the app:**
    - Go to [http://localhost:3000](http://localhost:3000)
 4. **Upload a PDF:**
-   - Use your own insurance policy PDF, or try this [Sample Car Insurance Policy PDF](https://doi.nv.gov/uploadedFiles/doinvgov/_public-documents/Consumers/PP_00_01_06_98.pdf)
+   - Use your own insurance policy PDF or DOCX, or try this [Sample Car Insurance Policy PDF](https://doi.nv.gov/uploadedFiles/doinvgov/_public-documents/Consumers/PP_00_01_06_98.pdf)
 5. **Enter your OpenAI API key** (required for embedding and chat).
 6. **Ask questions** about your policy using the example questions or your own.
 

@@ -11,7 +11,7 @@ from pydantic import BaseModel
 from openai import OpenAI
 import os
 from typing import Optional
-from aimakerspace.text_utils import PDFLoader, CharacterTextSplitter
+from aimakerspace.text_utils import PDFLoader, DocxLoader, CharacterTextSplitter
 from aimakerspace.vectordatabase import VectorDatabase
 import shutil
 import tempfile
@@ -130,15 +130,25 @@ qdrant.create_payload_index(
 async def upload_pdf(file: UploadFile = File(...), api_key: str = Form(...), user_id: str = Form("default"), pdf_id: str = Form("default")):
     print("[DEBUG] Received API key:", api_key)
     try:
-        # Save uploaded PDF to a temp file
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
+        # Detect file type and save to temp file with correct suffix
+        filename = file.filename or "uploaded_file"
+        if filename.lower().endswith(".pdf"):
+            suffix = ".pdf"
+        elif filename.lower().endswith(".docx"):
+            suffix = ".docx"
+        else:
+            return JSONResponse(status_code=400, content={"error": "Only PDF and DOCX files are supported."})
+        with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
             shutil.copyfileobj(file.file, tmp)
             tmp_path = tmp.name
-        print("[DEBUG] PDF saved to temp path:", tmp_path)
-        # Load and split PDF
-        loader = PDFLoader(tmp_path)
+        print(f"[DEBUG] File saved to temp path: {tmp_path}")
+        # Load and split document
+        if suffix == ".pdf":
+            loader = PDFLoader(tmp_path)
+        else:
+            loader = DocxLoader(tmp_path)
         documents = loader.load_documents()
-        print("[DEBUG] PDF loaded. Number of documents:", len(documents))
+        print(f"[DEBUG] Document loaded. Number of documents: {len(documents)}")
         splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
         global pdf_chunks, pdf_vector_db
         pdf_chunks = splitter.split_texts(documents)
