@@ -73,4 +73,16 @@ The API includes basic error handling for:
 - OpenAI API errors
 - General server errors
 
-All errors will return a 500 status code with an error message. 
+All errors will return a 500 status code with an error message.
+
+## Qdrant Configuration
+
+Set the following environment variables in your deployment environment (e.g., Vercel, local .env):
+
+```
+QDRANT_URL=https://2dcff33f-3246-426d-a078-7cc2e2757e2b.us-east4-0.gcp.cloud.qdrant.io:6333
+QDRANT_API_KEY=your-qdrant-api-key-here
+```
+
+- The `:6333` port is required for the Qdrant HTTP API.
+- Never commit your API key to source control. 

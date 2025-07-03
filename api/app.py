@@ -1,3 +1,6 @@
+from dotenv import load_dotenv
+load_dotenv()
+
 # Import required FastAPI components for building the API
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form
 from fastapi.responses import StreamingResponse, JSONResponse
@@ -12,7 +15,10 @@ from aimakerspace.text_utils import PDFLoader, CharacterTextSplitter
 from aimakerspace.vectordatabase import VectorDatabase
 import shutil
 import tempfile
+import uuid
 from aimakerspace.openai_utils.embedding import EmbeddingModel
+from qdrant_client import QdrantClient
+from qdrant_client.http.models import PointStruct, VectorParams, Distance, Filter, FieldCondition, MatchValue
 
 # Initialize FastAPI application with a title
 app = FastAPI(title="OpenAI Chat API")
@@ -75,37 +81,89 @@ async def health_check():
 pdf_vector_db = None
 pdf_chunks = None
 
+# Example Qdrant endpoint: https://2dcff33f-3246-426d-a078-7cc2e2757e2b.us-east4-0.gcp.cloud.qdrant.io:6333
+QDRANT_URL = os.environ.get("QDRANT_URL")  # Set this in your environment, e.g. https://2dcff33f-3246-426d-a078-7cc2e2757e2b.us-east4-0.gcp.cloud.qdrant.io:6333
+QDRANT_API_KEY = os.environ.get("QDRANT_API_KEY")  # Set this in your environment
+COLLECTION_NAME = "pdf_vectors"
+EMBEDDING_SIZE = 1536  # OpenAI embedding size
+
+if not QDRANT_URL:
+    raise RuntimeError("QDRANT_URL environment variable is not set. Please set it in your deployment environment.")
+if not QDRANT_API_KEY:
+    raise RuntimeError("QDRANT_API_KEY environment variable is not set. Please set it in your deployment environment.")
+
+qdrant = QdrantClient(url=QDRANT_URL, api_key=QDRANT_API_KEY)
+
+# Ensure collection exists
+try:
+    qdrant.get_collection(COLLECTION_NAME)
+except Exception:
+    qdrant.recreate_collection(
+        collection_name=COLLECTION_NAME,
+        vectors_config=VectorParams(size=EMBEDDING_SIZE, distance=Distance.COSINE)
+    )
+    # Crear índices para los filtros
+    qdrant.create_payload_index(
+        collection_name=COLLECTION_NAME,
+        field_name="user_id",
+        field_schema="keyword"
+    )
+    qdrant.create_payload_index(
+        collection_name=COLLECTION_NAME,
+        field_name="pdf_id",
+        field_schema="keyword"
+    )
+
+# Asegurar que los índices existen aunque la colección ya exista
+qdrant.create_payload_index(
+    collection_name=COLLECTION_NAME,
+    field_name="user_id",
+    field_schema="keyword"
+)
+qdrant.create_payload_index(
+    collection_name=COLLECTION_NAME,
+    field_name="pdf_id",
+    field_schema="keyword"
+)
+
 @app.post("/api/pdf/upload")
-async def upload_pdf(file: UploadFile = File(...), api_key: str = Form(...)):
+async def upload_pdf(file: UploadFile = File(...), api_key: str = Form(...), user_id: str = Form("default"), pdf_id: str = Form("default")):
+    print("[DEBUG] Received API key:", api_key)
     try:
         # Save uploaded PDF to a temp file
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
             shutil.copyfileobj(file.file, tmp)
             tmp_path = tmp.name
+        print("[DEBUG] PDF saved to temp path:", tmp_path)
         # Load and split PDF
         loader = PDFLoader(tmp_path)
         documents = loader.load_documents()
+        print("[DEBUG] PDF loaded. Number of documents:", len(documents))
         splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
         global pdf_chunks, pdf_vector_db
         pdf_chunks = splitter.split_texts(documents)
-        # Build vector DB with user-supplied API key
-        class UserEmbeddingModel(EmbeddingModel):
-            def __init__(self, api_key, embeddings_model_name: str = "text-embedding-3-small"):
-                self.openai_api_key = api_key
-                self.async_client = None
-                self.client = None
-                self.embeddings_model_name = embeddings_model_name
-                import openai
-                openai.api_key = api_key
-                from openai import AsyncOpenAI, OpenAI
-                self.async_client = AsyncOpenAI(api_key=api_key)
-                self.client = OpenAI(api_key=api_key)
-        vector_db = VectorDatabase(embedding_model=UserEmbeddingModel(api_key))
-        import asyncio
-        vector_db = await vector_db.abuild_from_list(pdf_chunks)
-        pdf_vector_db = vector_db
+        print("[DEBUG] Chunks creados:", len(pdf_chunks))
+        # Get embeddings
+        embedding_model = EmbeddingModel(embeddings_model_name="text-embedding-3-small", openai_api_key=api_key)
+        print("[DEBUG] Obteniendo embeddings...")
+        embeddings = embedding_model.get_embeddings(pdf_chunks)
+        print("[DEBUG] Embeddings obtenidos:", len(embeddings))
+        # Store in Qdrant
+        points = [
+            PointStruct(
+                id=str(uuid.uuid4()),
+                vector=embedding,
+                payload={"text": chunk, "user_id": user_id, "pdf_id": pdf_id}
+            )
+            for chunk, embedding in zip(pdf_chunks, embeddings)
+        ]
+        print("[DEBUG] Haciendo upsert a Qdrant...", "Num points:", len(points))
+        qdrant.upsert(collection_name=COLLECTION_NAME, points=points)
+        print("[DEBUG] Upsert a Qdrant completado")
+        pdf_vector_db = VectorDatabase(embedding_model=embedding_model)
         return {"status": "success", "num_chunks": len(pdf_chunks)}
     except Exception as e:
+        print("[ERROR] Exception in /api/pdf/upload:", str(e))
         return JSONResponse(status_code=500, content={"error": str(e)})
 
 class PDFChatRequest(BaseModel):
@@ -120,16 +178,28 @@ async def chat_with_pdf(request: PDFChatRequest):
         global pdf_vector_db, pdf_chunks
         if pdf_vector_db is None or pdf_chunks is None:
             return JSONResponse(status_code=400, content={"error": "No PDF indexed. Please upload a PDF first."})
-        # Retrieve top-k relevant chunks
-        top_chunks = pdf_vector_db.search_by_text(request.query, k=request.k, return_as_text=True)
-        # Compose context for RAG
+        # Get embedding for query
+        embedding_model = EmbeddingModel(embeddings_model_name="text-embedding-3-small", openai_api_key=request.api_key)
+        query_embedding = embedding_model.get_embedding(request.query)
+        # Search Qdrant for top-k relevant chunks
+        search_result = qdrant.search(
+            collection_name=COLLECTION_NAME,
+            query_vector=query_embedding,
+            limit=request.k,
+            query_filter=Filter(
+                must=[
+                    FieldCondition(key="user_id", match=MatchValue(value="default")),
+                    FieldCondition(key="pdf_id", match=MatchValue(value="default")),
+                ]
+            )
+        )
+        top_chunks = [hit.payload["text"] for hit in search_result]
         context = "\n---\n".join(top_chunks)
         system_message = (
             "You are an expert insurance assistant. Use the provided insurance policy context to answer the user's question as clearly and accurately as possible. "
             "If the answer is not in the context, say 'I could not find this information in your policy.'\n"
         )
         prompt = f"{system_message}\nContext:\n{context}\n\nQuestion: {request.query}\nAnswer:"
-        # Use OpenAI API for completion
         client = OpenAI(api_key=request.api_key) if request.api_key else OpenAI()
         completion = client.chat.completions.create(
             model=request.model,
