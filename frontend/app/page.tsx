@@ -113,7 +113,7 @@ export default function Home() {
               <span>Insurance Policy Q&amp;A Assistant</span>
             </div>
             <p style={{ fontSize: 18, color: '#555', fontWeight: 400, margin: '16px 0 0 0', maxWidth: 700, textAlign: 'center' }}>
-              Upload your car or home insurance policy PDF and ask questions about your coverage, deductibles, exclusions, and more. Try the example questions below!
+              Upload your insurance policy document (PDF) and ask questions about your coverage, deductibles, exclusions, and more. Try the example questions below!
             </p>
           </div>
         </div>
